@@ -10,6 +10,7 @@ interface FormData {
     telefono: string;
     mensaje: string;
 }
+//http://localhost:3000/users
 
 const ContactForm: React.FC = () => {
     const [formData, setFormData] = useState<FormData>({
@@ -26,13 +27,26 @@ const ContactForm: React.FC = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        // Validación simple de ejemplo
-        if (!formData.nombre || !formData.correo || !formData.telefono || !formData.mensaje) {
-            toast.error('Todos los campos son obligatorios');
-            return;
+    // Validación simple
+    if (!formData.nombre || !formData.correo || !formData.telefono || !formData.mensaje) {
+        toast.error('Todos los campos son obligatorios');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al enviar el formulario');
         }
 
         // Mostrar SweetAlert
@@ -43,7 +57,6 @@ const ContactForm: React.FC = () => {
             confirmButtonColor: '#2563eb',
         });
 
-        // Toast de confirmación
         toast.success('Enviado correctamente ✅');
 
         // Limpiar formulario
@@ -53,7 +66,12 @@ const ContactForm: React.FC = () => {
             telefono: '',
             mensaje: '',
         });
-    };
+    } catch (error) {
+        toast.error('Error al enviar el formulario. Intenta más tarde.');
+        console.error(error);
+    }
+};
+
 
     return (
         <>
